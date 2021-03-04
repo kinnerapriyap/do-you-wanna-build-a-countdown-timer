@@ -36,7 +36,6 @@ fun MyApp() {
 
     var yCoordinate by remember { mutableStateOf(0f) }
     var absTranslation by remember { mutableStateOf(0f) }
-    var scaleForTranslation by remember { mutableStateOf(1f) }
 
     var potentiallyAtTop by remember { mutableStateOf(true) }
     var stuck by remember { mutableStateOf(true) }
@@ -72,7 +71,6 @@ fun MyApp() {
                             else yCoordinate + delta
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate else screenHeight - yCoordinate
-                        scaleForTranslation = 1 + absTranslation / size
                         if (stuck) {
                             stuck = absTranslation < stickyThreshold
                             justUnstuck = !stuck
@@ -82,7 +80,6 @@ fun MyApp() {
                         potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
                         yCoordinate = if (potentiallyAtTop) 0f else dragRange
                         absTranslation = 0f
-                        scaleForTranslation = 1f
                         stuck = true
                     }
                 ),
@@ -96,7 +93,7 @@ fun MyApp() {
                     startPositionX = 0f,
                     endPositionX = size,
                     startPositionY = 0f,
-                    endPositionY = if (stuck) size * scaleForTranslation else size
+                    endPositionY = if (stuck) size + absTranslation else size
                 )
                 if (!potentiallyAtTop && !isDebug) scale(1f, -1f) {}
                 drawPath(
