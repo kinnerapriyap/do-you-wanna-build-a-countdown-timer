@@ -89,7 +89,7 @@ fun MyApp() {
             Canvas(modifier = Modifier.wrapContentSize()) {
                 val paintColorPair = Color(0xff33b5e5) to Color(0xffffbb33)
                 bounds = bounds.copy(
-                    stretchFactor = 0f,
+                    stretchFactor = if (stuck) absTranslation / stickyThreshold else 0f,
                     startPositionX = 0f,
                     endPositionX = size,
                     startPositionY = 0f,
