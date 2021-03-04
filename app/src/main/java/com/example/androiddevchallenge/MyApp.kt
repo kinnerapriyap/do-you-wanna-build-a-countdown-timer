@@ -39,7 +39,6 @@ fun MyApp() {
 
     var potentiallyAtTop by remember { mutableStateOf(true) }
     var stuck by remember { mutableStateOf(true) }
-    var justUnstuck by remember { mutableStateOf(true) }
 
     var screenHeight by remember { mutableStateOf(0) }
     val dragRange = screenHeight - size
@@ -70,11 +69,9 @@ fun MyApp() {
                             if (newCoordinate < 0 || newCoordinate > dragRange) yCoordinate
                             else yCoordinate + delta
                         absTranslation =
-                            if (potentiallyAtTop) yCoordinate else screenHeight - yCoordinate
-                        if (stuck) {
-                            stuck = absTranslation < stickyThreshold
-                            justUnstuck = !stuck
-                        }
+                            if (potentiallyAtTop) yCoordinate
+                            else screenHeight - yCoordinate
+                        if (stuck) stuck = absTranslation < stickyThreshold
                     },
                     onDragStopped = {
                         potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
