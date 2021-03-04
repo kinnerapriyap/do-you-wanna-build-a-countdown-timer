@@ -39,6 +39,7 @@ fun MyApp() {
 
     var yCoordinate by remember { mutableStateOf(0f) }
     var absTranslation by remember { mutableStateOf(0f) }
+    var scaleForTranslation by remember { mutableStateOf(1f) }
     var potentiallyAtTop by remember { mutableStateOf(true) }
 
     Scaffold {
@@ -61,11 +62,13 @@ fun MyApp() {
                             else yCoordinate + delta
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate else screenHeight - yCoordinate
+                        scaleForTranslation = 1 + absTranslation / size
                     },
                     onDragStopped = {
                         potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
                         yCoordinate = if (potentiallyAtTop) 0f else dragRange
                         absTranslation = 0f
+                        scaleForTranslation = 1f
                     }
                 ),
             contentAlignment = BiasAlignment(-0.3f, -1f)
@@ -78,7 +81,7 @@ fun MyApp() {
                     startPositionX = 0f,
                     endPositionX = size,
                     startPositionY = 0f,
-                    endPositionY = size
+                    endPositionY = size * scaleForTranslation
                 )
                 if (!potentiallyAtTop && !isDebug) scale(1f, -1f) {}
                 drawPath(
