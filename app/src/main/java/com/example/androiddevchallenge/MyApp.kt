@@ -72,7 +72,7 @@ fun MyApp() {
                             else yCoordinate + delta
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate else screenHeight - yCoordinate
-                        scaleForTranslation = if (stuck) 1 + absTranslation / size else 1f
+                        scaleForTranslation = 1 + absTranslation / size
                         if (stuck) {
                             stuck = absTranslation < stickyThreshold
                             justUnstuck = !stuck
@@ -96,7 +96,7 @@ fun MyApp() {
                     startPositionX = 0f,
                     endPositionX = size,
                     startPositionY = 0f,
-                    endPositionY = size * scaleForTranslation
+                    endPositionY = if (stuck) size * scaleForTranslation else size
                 )
                 if (!potentiallyAtTop && !isDebug) scale(1f, -1f) {}
                 drawPath(
