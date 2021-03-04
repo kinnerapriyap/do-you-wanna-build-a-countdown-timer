@@ -34,24 +34,34 @@ fun MyApp() {
     val isDebug = false
     val size = 300f
 
-    var screenHeight by remember { mutableStateOf(0) }
-    val dragRange = screenHeight - size
-
     var yCoordinate by remember { mutableStateOf(0f) }
     var absTranslation by remember { mutableStateOf(0f) }
     var scaleForTranslation by remember { mutableStateOf(1f) }
+
     var potentiallyAtTop by remember { mutableStateOf(true) }
+    var stuck by remember { mutableStateOf(true) }
+    var justUnstuck by remember { mutableStateOf(true) }
+
+    var screenHeight by remember { mutableStateOf(0) }
+    val dragRange = screenHeight - size
+
+    val stickyThreshold =
+        if (potentiallyAtTop) screenHeight / 3f
+        else screenHeight / 3f + size / 2f
+    val offset = if (stuck && potentiallyAtTop) 0 else yCoordinate.toInt()
 
     Scaffold {
         Text(
-            text = "yCoordinate: $yCoordinate\n" +
-                    "absTranslation: $absTranslation\n" +
-                    "potentiallyAtTop: $potentiallyAtTop\n",
+            text = "yCoord: $yCoordinate\n" +
+                    "absT: $absTranslation\n" +
+                    "pAtTop: $potentiallyAtTop\n" +
+                    "sThreshold: $stickyThreshold\n" +
+                    "stuck: $stuck\n",
             modifier = Modifier.padding(20.dp)
         )
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize()
-                .offset { IntOffset(0, yCoordinate.toInt()) }
+                .offset { IntOffset(0, offset) }
                 .draggable(
                     orientation = Orientation.Vertical,
                     state = rememberDraggableState { delta ->
@@ -62,13 +72,18 @@ fun MyApp() {
                             else yCoordinate + delta
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate else screenHeight - yCoordinate
-                        scaleForTranslation = 1 + absTranslation / size
+                        scaleForTranslation = if (stuck) 1 + absTranslation / size else 1f
+                        if (stuck) {
+                            stuck = absTranslation < stickyThreshold
+                            justUnstuck = !stuck
+                        }
                     },
                     onDragStopped = {
                         potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
                         yCoordinate = if (potentiallyAtTop) 0f else dragRange
                         absTranslation = 0f
                         scaleForTranslation = 1f
+                        stuck = true
                     }
                 ),
             contentAlignment = BiasAlignment(-0.3f, -1f)
