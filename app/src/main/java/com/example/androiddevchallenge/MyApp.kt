@@ -15,6 +15,7 @@
  */
 package com.example.androiddevchallenge
 
+import androidx.compose.animation.Animatable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,6 +71,15 @@ fun MyApp() {
             else -> yCoordinate.toInt()
         }
 
+    val paintColorPair = Color(0xff33b5e5) to Color(0xffffbb33)
+    val color = remember { Animatable(paintColorPair.first) }
+    LaunchedEffect(potentiallyAtTop) {
+        color.animateTo(
+            if (potentiallyAtTop) paintColorPair.first
+            else paintColorPair.second
+        )
+    }
+
     Scaffold {
         Text(
             text = "yCoord: $yCoordinate\n" +
@@ -105,7 +116,6 @@ fun MyApp() {
         ) {
             screenHeight = this.constraints.maxHeight
             Canvas(modifier = Modifier.wrapContentSize()) {
-                val paintColorPair = Color(0xff33b5e5) to Color(0xffffbb33)
                 bounds = bounds.copy(
                     stretchFactor = if (stuck) absTranslation / stickyThreshold else 0f,
                     startPositionX = 0f,
@@ -123,8 +133,7 @@ fun MyApp() {
                         style = if (isDebug) Stroke(width = 3f) else Fill,
                         color = when {
                             isDebug -> Color.Black
-                            potentiallyAtTop -> paintColorPair.first
-                            else -> paintColorPair.second
+                            else -> color.value
                         }
                     )
                 }
