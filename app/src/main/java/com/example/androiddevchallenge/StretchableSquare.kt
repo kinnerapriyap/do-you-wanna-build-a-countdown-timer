@@ -15,6 +15,7 @@
  */
 package com.example.androiddevchallenge
 
+import android.content.Context
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -28,8 +29,11 @@ import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +48,11 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import android.os.CountDownTimer
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 
 enum class BoxState {
     JustUnstuck,
@@ -68,6 +77,12 @@ fun StretchableSquare() {
     val stickyThreshold =
         if (potentiallyAtTop) screenHeight / 3f - size / 2
         else screenHeight / 3f
+
+    var timer by remember { mutableStateOf("") }
+    val timerText = absTranslation.let {
+        return@let if (stuck) it.toInt().toMinSecString() else "0 : 0"
+    }
+    var countDownTimer by remember { mutableStateOf<CountDownTimer?>(null) }
 
     val paintColorPair = Color(0xff33b5e5) to Color(0xffffbb33)
     val color = remember { Animatable(paintColorPair.first) }
@@ -110,6 +125,7 @@ fun StretchableSquare() {
             BoxState.Normal -> yCoordinate.toInt()
         }
     }
+    val context = LocalContext.current
 
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
@@ -127,6 +143,11 @@ fun StretchableSquare() {
                         else screenHeight - yCoordinate - size
                     if (stuck) {
                         stuck = absTranslation < stickyThreshold
+                        if (!stuck) {
+                            showToast(context, "Oops, you just cancelled your timer!")
+                            countDownTimer?.cancel()
+                            countDownTimer = null
+                        }
                         currentState = if (stuck) BoxState.Stuck else BoxState.JustUnstuck
                     }
                 },
@@ -134,12 +155,27 @@ fun StretchableSquare() {
                     currentState = BoxState.Normal
                     potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
                     yCoordinate = if (potentiallyAtTop) 0f else dragRange
+                    if (stuck && countDownTimer == null)
+                        countDownTimer =
+                            object : CountDownTimer(absTranslation.toInt() * 1000L, 1000) {
+                                override fun onTick(millisUntilFinished: Long) {
+                                    timer = (millisUntilFinished / 1000).toInt().toMinSecString()
+                                }
+
+                                override fun onFinish() {
+                                    timer = "Done!"
+                                }
+                            }.start()
                     absTranslation = 0f
                     stuck = true
                 }
             ),
         contentAlignment = BiasAlignment(-0.3f, -1f)
     ) {
+        Text(
+            text = if (stuck && countDownTimer != null) timer else timerText,
+            modifier = Modifier.fillMaxWidth().padding(40.dp)
+        )
         screenHeight = this.constraints.maxHeight
         Canvas(modifier = Modifier.wrapContentSize()) {
             val bounds = StretchableSquareBounds(
@@ -165,6 +201,18 @@ fun StretchableSquare() {
             }
         }
     }
+}
+
+fun showToast(context: Context, message: String) {
+    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+}
+
+fun Int.toMinSecString(): String {
+    var no = this
+    val min = no / 60
+    no -= min * 60
+    val sec = no
+    return "$min : $sec"
 }
 
 fun isInTopHalf(yTranslation: Float, size: Float, screenHeight: Int) =
