@@ -166,3 +166,6 @@ fun StretchableSquare() {
         }
     }
 }
+
+fun isInTopHalf(yTranslation: Float, size: Float, screenHeight: Int) =
+    yTranslation + size / 2 <= screenHeight / 2f
