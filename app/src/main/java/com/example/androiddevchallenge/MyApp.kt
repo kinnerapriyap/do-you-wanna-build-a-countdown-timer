@@ -16,6 +16,12 @@
 package com.example.androiddevchallenge
 
 import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.Spring.DampingRatioMediumBouncy
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateInt
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
@@ -82,6 +88,21 @@ fun MyApp() {
 
     var currentState by remember { mutableStateOf(BoxState.Stuck) }
     val transition = updateTransition(currentState)
+    val stretchFactor by transition.animateFloat(
+        transitionSpec = {
+            when {
+                BoxState.Stuck isTransitioningTo BoxState.JustUnstuck ->
+                    spring(dampingRatio = DampingRatioMediumBouncy)
+                else -> tween(durationMillis = 100)
+            }
+        }
+    ) { state ->
+        when (state) {
+            BoxState.JustUnstuck -> 0f
+            BoxState.Stuck -> absTranslation / stickyThreshold
+            BoxState.Normal -> 0f
+        }
+    }
     val yOffset by transition.animateInt(
         transitionSpec = {
             when {
@@ -135,7 +156,7 @@ fun MyApp() {
             screenHeight = this.constraints.maxHeight
             Canvas(modifier = Modifier.wrapContentSize()) {
                 bounds = bounds.copy(
-                    stretchFactor = if (stuck) absTranslation / stickyThreshold else 0f,
+                    stretchFactor = stretchFactor,
                     startPositionX = 0f,
                     endPositionX = size,
                     startPositionY = 0f,
