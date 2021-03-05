@@ -75,7 +75,7 @@ fun MyApp() {
                             else yCoordinate + delta
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate
-                            else screenHeight - yCoordinate
+                            else screenHeight - yCoordinate - size
                         if (stuck) stuck = absTranslation < stickyThreshold
                     },
                     onDragStopped = {
