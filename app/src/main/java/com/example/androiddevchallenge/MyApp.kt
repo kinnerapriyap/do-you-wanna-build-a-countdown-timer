@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -97,16 +98,21 @@ fun MyApp() {
                     startPositionY = 0f,
                     endPositionY = if (stuck) size + absTranslation else size
                 )
-                if (!potentiallyAtTop && !isDebug) scale(1f, -1f) {}
-                drawPath(
-                    path = bounds.getStretchableSquarePath(isDebug),
-                    style = if (isDebug) Stroke(width = 3f) else Fill,
-                    color = when {
-                        isDebug -> Color.Black
-                        potentiallyAtTop -> paintColorPair.first
-                        else -> paintColorPair.second
-                    }
-                )
+                scale(
+                    scaleX = 1f,
+                    scaleY = if (!potentiallyAtTop && !isDebug) -1f else 1f,
+                    pivot = Offset(size / 2, size / 2)
+                ) {
+                    drawPath(
+                        path = bounds.getStretchableSquarePath(isDebug),
+                        style = if (isDebug) Stroke(width = 3f) else Fill,
+                        color = when {
+                            isDebug -> Color.Black
+                            potentiallyAtTop -> paintColorPair.first
+                            else -> paintColorPair.second
+                        }
+                    )
+                }
             }
         }
     }
