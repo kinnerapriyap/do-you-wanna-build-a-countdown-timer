@@ -70,12 +70,6 @@ fun MyApp() {
     val stickyThreshold =
         if (potentiallyAtTop) screenHeight / 3f - size / 2
         else screenHeight / 3f
-    val offset =
-        when {
-            stuck && potentiallyAtTop -> 0
-            stuck && !potentiallyAtTop -> dragRange.toInt()
-            else -> yCoordinate.toInt()
-        }
 
     val paintColorPair = Color(0xff33b5e5) to Color(0xffffbb33)
     val color = remember { Animatable(paintColorPair.first) }
