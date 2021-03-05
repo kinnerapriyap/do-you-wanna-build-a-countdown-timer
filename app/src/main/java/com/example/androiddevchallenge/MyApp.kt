@@ -88,6 +88,21 @@ fun MyApp() {
 
     var currentState by remember { mutableStateOf(BoxState.Stuck) }
     val transition = updateTransition(currentState)
+    val yOffset by transition.animateInt(
+        transitionSpec = {
+            when {
+                BoxState.JustUnstuck isTransitioningTo BoxState.Normal ->
+                    spring(dampingRatio = DampingRatioMediumBouncy)
+                else -> tween(durationMillis = 1)
+            }
+        }
+    ) { state ->
+        when (state) {
+            BoxState.JustUnstuck -> yCoordinate.toInt()
+            BoxState.Stuck -> if (potentiallyAtTop) 0 else dragRange.toInt()
+            BoxState.Normal -> yCoordinate.toInt()
+        }
+    }
 
     Scaffold {
         Text(
@@ -96,7 +111,7 @@ fun MyApp() {
         )
         BoxWithConstraints(
             modifier = Modifier.fillMaxSize()
-                .offset { IntOffset(0, offset) }
+                .offset { IntOffset(0, yOffset) }
                 .draggable(
                     orientation = Orientation.Vertical,
                     state = rememberDraggableState { delta ->
