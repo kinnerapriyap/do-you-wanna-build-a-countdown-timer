@@ -46,6 +46,12 @@ fun MyApp() {
     val stickyThreshold =
         if (potentiallyAtTop) screenHeight / 3f - size / 2
         else screenHeight / 3f
+    val offset =
+        when {
+            stuck && potentiallyAtTop -> 0
+            stuck && !potentiallyAtTop -> dragRange.toInt()
+            else -> yCoordinate.toInt()
+        }
 
     Scaffold {
         Text(
