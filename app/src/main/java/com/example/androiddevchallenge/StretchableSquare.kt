@@ -52,8 +52,10 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 enum class BoxState {
     JustUnstuck,
@@ -144,7 +146,7 @@ fun StretchableSquare() {
                         else screenHeight - yCoordinate - size
                     if (stuck) {
                         stuck = absTranslation < stickyThreshold
-                        if (!stuck) {
+                        if (!stuck && countDownTimer != null) {
                             showToast(context, "Oops, you just cancelled your timer!")
                             countDownTimer?.cancel()
                             countDownTimer = null
@@ -175,7 +177,9 @@ fun StretchableSquare() {
     ) {
         Text(
             text = if (stuck && countDownTimer != null) timer else timerText,
-            modifier = Modifier.fillMaxWidth().padding(40.dp)
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp)
+                .offset { IntOffset(0, size.toInt() / 3) },
+            style = TextStyle(fontSize = 30.sp)
         )
         Button(
             onClick = {
