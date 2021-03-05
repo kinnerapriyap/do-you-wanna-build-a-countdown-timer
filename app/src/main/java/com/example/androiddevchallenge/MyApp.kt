@@ -47,6 +47,12 @@ import com.example.androiddevchallenge.ui.theme.MyTheme
 
 var bounds: StretchableSquareBounds = StretchableSquareBounds()
 
+enum class BoxState {
+    JustUnstuck,
+    Stuck,
+    Normal
+}
+
 @Composable
 fun MyApp() {
     val isDebug = false
@@ -80,13 +86,12 @@ fun MyApp() {
         )
     }
 
+    var currentState by remember { mutableStateOf(BoxState.Stuck) }
+    val transition = updateTransition(currentState)
+
     Scaffold {
         Text(
-            text = "yCoord: $yCoordinate\n" +
-                "absT: $absTranslation\n" +
-                "pAtTop: $potentiallyAtTop\n" +
-                "sThreshold: $stickyThreshold\n" +
-                "stuck: $stuck\n",
+            text = "absT:$absTranslation\nstate:$currentState\nsThr:$stickyThreshold\n",
             modifier = Modifier.padding(20.dp)
         )
         BoxWithConstraints(
@@ -103,9 +108,13 @@ fun MyApp() {
                         absTranslation =
                             if (potentiallyAtTop) yCoordinate
                             else screenHeight - yCoordinate - size
-                        if (stuck) stuck = absTranslation < stickyThreshold
+                        if (stuck) {
+                            stuck = absTranslation < stickyThreshold
+                            currentState = if (stuck) BoxState.Stuck else BoxState.JustUnstuck
+                        }
                     },
                     onDragStopped = {
+                        currentState = BoxState.Normal
                         potentiallyAtTop = isInTopHalf(yCoordinate, size, screenHeight)
                         yCoordinate = if (potentiallyAtTop) 0f else dragRange
                         absTranslation = 0f
