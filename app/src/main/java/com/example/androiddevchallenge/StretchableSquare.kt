@@ -16,6 +16,8 @@
 package com.example.androiddevchallenge
 
 import android.content.Context
+import android.os.CountDownTimer
+import android.widget.Toast
 import androidx.compose.animation.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -33,6 +35,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,12 +51,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import android.os.CountDownTimer
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-
 
 enum class BoxState {
     JustUnstuck,
@@ -176,6 +177,17 @@ fun StretchableSquare() {
             text = if (stuck && countDownTimer != null) timer else timerText,
             modifier = Modifier.fillMaxWidth().padding(40.dp)
         )
+        Button(
+            onClick = {
+                countDownTimer?.cancel()
+                countDownTimer = null
+            },
+            modifier = Modifier.wrapContentSize()
+                .offset { IntOffset(constraints.maxWidth / 2, size.toInt() / 3) },
+            colors = ButtonDefaults.buttonColors(backgroundColor = color.value)
+        ) {
+            Text(text = "Stop")
+        }
         screenHeight = this.constraints.maxHeight
         Canvas(modifier = Modifier.wrapContentSize()) {
             val bounds = StretchableSquareBounds(
